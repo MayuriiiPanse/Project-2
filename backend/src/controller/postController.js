@@ -1,51 +1,92 @@
-// const uploadFile = require("../service/storage.service.js");
-// const generateCaption = require("../service/ai.service.js");
-// const fs = require("fs");
-
-// async function createPostController(req, res) {
-//   try {
-//     const file = req.file;
-
-//     if (!file) {
-//       return res.status(400).json({
-//         message: "Image is required",
-//       });
-//     }
-
-//     console.log("File received:", file);
-
-//     // convert image to base64 for AI caption
-//     const imageBuffer = fs.readFileSync(file.path);
-
-
-//     // upload to cloudinary
-//     const result = await uploadFile(file.path);
-//     const caption = await generateCaption(result.secure_url);
-
-//     res.json({
-//       caption,
-//       imageUrl: result.secure_url,
-//     });
-//   } catch (error) {
-//     console.log(error);
-
-//     res.status(500).json({
-//       message: "Upload failed",
-//     });
-//   }
-// }
-
-// module.exports = {
-//   createPostController,
-// };
-
 const uploadFile = require("../service/storage.service.js");
 
 const generateAIContent = require("../service/ai.service.js");
 
 const postModel = require("../models/post.model.js");
 
+const historyService = require(
+    "../service/history.service"
+);
+
 const fs = require("fs");
+
+// async function createPostController(req, res) {
+
+//     try {
+
+//         const file = req.file;
+
+//         if (!file) {
+
+//             return res.status(400).json({
+//                 message: "Image is required",
+//             });
+
+//         }
+
+//         console.log("File received:", file);
+
+//         // Upload image to Cloudinary
+//         const result = await uploadFile(file.path);
+
+//         // Generate ALL AI content
+//         const aiData = await generateAIContent(
+//             result.secure_url
+//         );
+
+//         // Save to MongoDB
+//         const post = await postModel.create({
+
+//             image: result.secure_url,
+
+//             caption: aiData.caption,
+
+//             hashtags: aiData.hashtags,
+
+//             mood: aiData.mood,
+
+//             story: aiData.story,
+
+//             reelScript: aiData.reelScript,
+
+//             viralHook: aiData.viralHook,
+
+//             aiPrompt: aiData.aiPrompt,
+
+//             user: req.user._id
+
+//         });
+
+//         // Delete local upload
+//         fs.unlinkSync(file.path);
+
+//         // res.status(201).json({
+
+//         //     message: "Post created successfully",
+
+//         //     post
+
+//         // });
+
+//         res.status(201).json({
+//    message: "Post created successfully",
+//    postId: post._id,
+//    caption: post.caption
+// });
+
+//     } catch (error) {
+
+//         console.log(error);
+
+//         res.status(500).json({
+
+//             message: "Upload failed"
+
+//         });
+
+//     }
+
+// }
 
 async function createPostController(req, res) {
 
@@ -66,12 +107,12 @@ async function createPostController(req, res) {
         // Upload image to Cloudinary
         const result = await uploadFile(file.path);
 
-        // Generate ALL AI content
+        // Generate AI content
         const aiData = await generateAIContent(
             result.secure_url
         );
 
-        // Save to MongoDB
+        // Save Post
         const post = await postModel.create({
 
             image: result.secure_url,
@@ -94,22 +135,47 @@ async function createPostController(req, res) {
 
         });
 
-        // Delete local upload
+        // Save History
+        await historyService.saveHistory({
+
+            user: req.user._id,
+
+            type: "image-analysis",
+
+            data: {
+
+                image: result.secure_url,
+
+                caption: aiData.caption,
+
+                hashtags: aiData.hashtags,
+
+                mood: aiData.mood,
+
+                story: aiData.story,
+
+                reelScript: aiData.reelScript,
+
+                viralHook: aiData.viralHook,
+
+                aiPrompt: aiData.aiPrompt
+
+            }
+
+        });
+
+        // Delete local uploaded file
         fs.unlinkSync(file.path);
 
-        // res.status(201).json({
-
-        //     message: "Post created successfully",
-
-        //     post
-
-        // });
-
         res.status(201).json({
-   message: "Post created successfully",
-   postId: post._id,
-   caption: post.caption
-});
+
+            message: "Post created successfully",
+
+            postId: post._id,
+
+            caption: post.caption
+
+        });
 
     } catch (error) {
 
@@ -124,6 +190,7 @@ async function createPostController(req, res) {
     }
 
 }
+
 async function getPostByIdController(req, res) {
 
     try {

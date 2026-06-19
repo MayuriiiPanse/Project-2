@@ -6,6 +6,10 @@ const chatModel = require(
     '../models/chat.model'
 );
 
+const historyService = require(
+    '../service/history.service'
+);
+
 async function chatController(req, res) {
 
     try {
@@ -32,6 +36,22 @@ async function chatController(req, res) {
             message,
 
             response: aiResponse
+
+        });
+
+        await historyService.saveHistory({
+
+            user: req.user._id,
+
+            type: "chat",
+
+            data: {
+
+                prompt: message,
+
+                response: aiResponse
+
+            }
 
         });
 
