@@ -56,7 +56,48 @@ const getHistoryByType = async (
 
 };
 
+
+const deleteHistory = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const deleted =
+        await historyService.deleteHistory(
+            req.params.id,
+            req.user.id
+        );
+
+        if (!deleted) {
+
+            return res.status(404).json({
+                success: false,
+                message: "History not found"
+            });
+
+        }
+
+        res.status(200).json({
+            success: true,
+            message:
+            "History deleted successfully"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
 module.exports = {
     getHistory,
-    getHistoryByType
+    getHistoryByType,
+    deleteHistory
 };

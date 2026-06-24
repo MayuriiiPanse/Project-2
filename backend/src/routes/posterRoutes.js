@@ -20,4 +20,10 @@ router.get(
     posterController.getAllPosters
 );
 
+router.delete(
+    "/:id",
+    authMiddleware,
+    posterController.deletePoster
+);
+
 module.exports = router;

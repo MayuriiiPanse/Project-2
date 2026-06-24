@@ -19,4 +19,10 @@ router.get(
     historyController.getHistoryByType
 );
 
+router.delete(
+    "/:id",
+    authMiddleware,
+    historyController.deleteHistory
+);
+
 module.exports = router;

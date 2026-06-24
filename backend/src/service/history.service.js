@@ -36,8 +36,21 @@ const getHistoryByType = async (
 
 };
 
+const deleteHistory = async (
+    historyId,
+    userId
+) => {
+
+    return await History.findOneAndDelete({
+        _id: historyId,
+        user: userId
+    });
+
+};
+
 module.exports = {
     saveHistory,
     getHistory,
-    getHistoryByType
+    getHistoryByType,
+    deleteHistory
 };

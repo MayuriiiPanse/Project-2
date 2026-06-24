@@ -36,4 +36,10 @@ router.delete(
     projectController.deleteProject
 );
 
+router.put(
+    "/:projectId",
+    authMiddleware,
+    projectController.updateProject
+);
+
 module.exports = router;

@@ -50,10 +50,60 @@ const deleteProject = async (projectId) => {
     return project;
 };
 
+
+// const updateProject = async (
+//     projectId,
+//     updateData
+// ) => {
+
+//     const project =
+//     await Project.findByIdAndUpdate(
+//         projectId,
+//         updateData,
+//         { new: true }
+//     );
+
+//     if (!project) {
+//         throw new Error("Project not found");
+//     }
+
+//     return project;
+// };
+
+const updateProject = async (
+    projectId,
+    updateData
+) => {
+
+    console.log("Project ID:", projectId);
+
+    const existingProject =
+    await Project.findById(projectId);
+
+    console.log("Found Project:", existingProject);
+
+    const project =
+    await Project.findByIdAndUpdate(
+        projectId,
+        updateData,
+        {
+            returnDocument: "after"
+        }
+    );
+
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    return project;
+};
+
+
 module.exports = {
     createProject,
     getProjects,
     addContentToProject,
     getProjectById,
-    deleteProject
+    deleteProject,
+    updateProject
 };
