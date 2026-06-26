@@ -1,150 +1,115 @@
-const express = require('express');
-const postModel = require('../models/post.model.js');
-const multer = require('multer');
-const { createPostController,
+const express = require("express");
+const multer = require("multer");
 
+const {
+    createPostController,
+    getAllPostsController,
     getPostByIdController,
-
     getCaptionController,
-
     getHashtagsController,
-
     getStoryController,
-
     getMoodController,
-
     getReelScriptController,
-
     getViralHookController,
+    getPromptController,
+    updatePostController,
+    deletePostController
+} = require("../controller/postController.js");
 
-    getPromptController} = require('../controller/postController.js');
-
-const authMiddleware = require('../middlewares/auth.middleware.js');
-
-const prouter = express.Router();
-//const upload = multer({storage: multer.memoryStorage()})
-//const multer = require("multer");
-
-const upload = multer({
-  dest: "uploads/",
-});
-
-// prouter.post('/', authMiddleware, upload.single('image'),createPostController);
-
-
-// module.exports = prouter;
-
-// CREATE POST
-prouter.post(
-
-    '/create',
-
-    authMiddleware,
-
-    upload.single('image'),
-
-    createPostController
-
+const authMiddleware = require(
+    "../middlewares/auth.middleware.js"
 );
 
+const prouter = express.Router();
+
+const upload = multer({
+    dest: "uploads/"
+});
+
+// CREATE POST WITH IMAGE + AI ANALYSIS
+prouter.post(
+    "/create",
+    authMiddleware,
+    upload.single("image"),
+    createPostController
+);
+
+// GET ALL POSTS OF LOGGED-IN USER
+// Must be before "/:id"
+prouter.get(
+    "/all",
+    authMiddleware,
+    getAllPostsController
+);
 
 // GET FULL POST
 prouter.get(
-
-    '/:id',
-
+    "/:id",
     authMiddleware,
-
     getPostByIdController
-
 );
 
+// UPDATE POST CONTENT
+prouter.put(
+    "/:id",
+    authMiddleware,
+    updatePostController
+);
+
+// DELETE POST
+prouter.delete(
+    "/:id",
+    authMiddleware,
+    deletePostController
+);
 
 // GET CAPTION
 prouter.get(
-
-    '/:id/caption',
-
+    "/:id/caption",
     authMiddleware,
-
     getCaptionController
-
 );
-
 
 // GET HASHTAGS
 prouter.get(
-
-    '/:id/hashtags',
-
+    "/:id/hashtags",
     authMiddleware,
-
     getHashtagsController
-
 );
-
 
 // GET STORY
 prouter.get(
-
-    '/:id/story',
-
+    "/:id/story",
     authMiddleware,
-
     getStoryController
-
 );
-
 
 // GET MOOD
 prouter.get(
-
-    '/:id/mood',
-
+    "/:id/mood",
     authMiddleware,
-
     getMoodController
-
 );
-
 
 // GET REEL SCRIPT
 prouter.get(
-
-    '/:id/reel-script',
-
+    "/:id/reel-script",
     authMiddleware,
-
     getReelScriptController
-
 );
-
 
 // GET VIRAL HOOK
 prouter.get(
-
-    '/:id/viral-hook',
-
+    "/:id/viral-hook",
     authMiddleware,
-
     getViralHookController
-
 );
-
 
 // GET AI PROMPT
 prouter.get(
-
-    '/:id/prompt',
-
+    "/:id/prompt",
     authMiddleware,
-
     getPromptController
-
 );
 
-
-
-
 module.exports = prouter;
-

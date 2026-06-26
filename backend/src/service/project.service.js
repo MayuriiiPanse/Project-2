@@ -1,24 +1,48 @@
+const mongoose = require("mongoose");
 const Project = require("../models/project.model");
 
-const createProject = async(data)=>{
+const validateProjectId = (projectId) => {
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        const error = new Error("Invalid project ID");
+        error.statusCode = 400;
+        throw error;
+    }
+};
+
+const projectNotFoundError = () => {
+    const error = new Error(
+        "Project not found or you are not authorized"
+    );
+    error.statusCode = 404;
+    return error;
+};
+
+const createProject = async (data) => {
     return await Project.create(data);
 };
 
-const getProjects = async(userId)=>{
-    return await Project.find({ user:userId })
-    .sort({ createdAt:-1 });
+const getProjects = async (userId) => {
+    return await Project.find({
+        user: userId
+    }).sort({
+        createdAt: -1
+    });
 };
-
 
 const addContentToProject = async (
     projectId,
+    userId,
     contentData
 ) => {
+    validateProjectId(projectId);
 
-    const project = await Project.findById(projectId);
+    const project = await Project.findOne({
+        _id: projectId,
+        user: userId
+    });
 
     if (!project) {
-        throw new Error("Project not found");
+        throw projectNotFoundError();
     }
 
     project.items.push(contentData);
@@ -28,82 +52,67 @@ const addContentToProject = async (
     return project;
 };
 
-const getProjectById = async (projectId) => {
+const getProjectById = async (projectId, userId) => {
+    validateProjectId(projectId);
 
-    const project = await Project.findById(projectId);
+    const project = await Project.findOne({
+        _id: projectId,
+        user: userId
+    });
 
     if (!project) {
-        throw new Error("Project not found");
+        throw projectNotFoundError();
     }
 
     return project;
 };
-
-const deleteProject = async (projectId) => {
-
-    const project = await Project.findByIdAndDelete(projectId);
-
-    if (!project) {
-        throw new Error("Project not found");
-    }
-
-    return project;
-};
-
-
-// const updateProject = async (
-//     projectId,
-//     updateData
-// ) => {
-
-//     const project =
-//     await Project.findByIdAndUpdate(
-//         projectId,
-//         updateData,
-//         { new: true }
-//     );
-
-//     if (!project) {
-//         throw new Error("Project not found");
-//     }
-
-//     return project;
-// };
 
 const updateProject = async (
     projectId,
+    userId,
     updateData
 ) => {
+    validateProjectId(projectId);
 
-    console.log("Project ID:", projectId);
-
-    const existingProject =
-    await Project.findById(projectId);
-
-    console.log("Found Project:", existingProject);
-
-    const project =
-    await Project.findByIdAndUpdate(
-        projectId,
+    const project = await Project.findOneAndUpdate(
+        {
+            _id: projectId,
+            user: userId
+        },
         updateData,
         {
-            returnDocument: "after"
+            returnDocument: "after",
+            runValidators: true
         }
     );
 
     if (!project) {
-        throw new Error("Project not found");
+        throw projectNotFoundError();
     }
 
     return project;
 };
 
+const deleteProject = async (projectId, userId) => {
+    validateProjectId(projectId);
+
+    const project = await Project.findOneAndDelete({
+        _id: projectId,
+        user: userId
+    });
+
+    if (!project) {
+        throw projectNotFoundError();
+    }
+
+    return project;
+};
 
 module.exports = {
     createProject,
     getProjects,
     addContentToProject,
     getProjectById,
-    deleteProject,
-    updateProject
+    updateProject,
+    deleteProject
 };

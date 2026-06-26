@@ -7,6 +7,8 @@ const projectRoutes = require("./routes/projectRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const posterRoutes = require("./routes/posterRoutes");
 const voiceRoutes = require("./routes/voiceRoutes");
+const ragRoutes = require("./routes/ragRoutes");
+
 const path = require("path");
 const app = express();
 app.use(express.json());
@@ -19,6 +21,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/poster",posterRoutes);
 app.use("/api/voice", voiceRoutes);
+app.use("/api/rag", ragRoutes);
 app.use("/uploads",express.static(
         path.join(__dirname, "../uploads")
     ));
